@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal-content { background: white; margin: 15% auto; padding: 20px; border-radius: 5px; width: 300px; }
+        .close { float: right; cursor: pointer; font-size: 20px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        #registerBtn { background: #ccc; cursor: not-allowed; }
+        #registerBtn.enabled { background: #4CAF50; color: white; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Admin Login Test</h1>
+    <button id="adminLoginBtn" onclick="toggleAdminLogin()">Admin Login</button>
+    <button id="registerBtn" disabled>Register Student</button>
+
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; display: none; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 12px; padding: 30px; width: 90%; max-width: 400px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+            <h2 style="margin-top: 0; color: black; text-align: center;">Admin Login</h2>
+            <input type="password" id="adminPasswordInput" placeholder="Enter Admin Password (admin123)" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; background: white; color: black; box-sizing: border-box; font-size: 1rem;">
+            <div style="display: flex; gap: 10px;">
+                <button id="adminLoginConfirmBtn" style="flex: 1; padding: 10px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Login</button>
+                <button id="adminLoginCancelBtn" style="flex: 1; padding: 10px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+            </div>
+            <p id="adminLoginError" style="color: #ef4444; margin-top: 10px; margin-bottom: 0; text-align: center; display: none;"></p>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let adminLoginBtn, registerBtn, adminLoginModal, adminPasswordInput, adminLoginConfirmBtn, adminLoginCancelBtn, adminLoginError;
+
+        // Initialize elements when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded - Initializing elements...');
+
+            // Get DOM elements
+            adminLoginBtn = document.getElementById('adminLoginBtn');
+            registerBtn = document.getElementById('registerBtn');
+            adminLoginModal = document.getElementById('adminLoginModal');
+            adminPasswordInput = document.getElementById('adminPasswordInput');
+            adminLoginConfirmBtn = document.getElementById('adminLoginConfirmBtn');
+            adminLoginCancelBtn = document.getElementById('adminLoginCancelBtn');
+            adminLoginError = document.getElementById('adminLoginError');
+
+            console.log('Admin button element:', adminLoginBtn);
+            console.log('All elements loaded:', { adminLoginBtn, registerBtn, adminLoginModal, adminPasswordInput });
+
+            // Attach event listeners
+            if (adminLoginConfirmBtn) {
+                adminLoginConfirmBtn.addEventListener('click', submitAdminLogin);
+            }
+            if (adminLoginCancelBtn) {
+                adminLoginCancelBtn.addEventListener('click', closeAdminLoginModal);
+            }
+            if (adminPasswordInput) {
+                adminPasswordInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        submitAdminLogin();
+                    }
+                });
+            }
+
+            console.log('App initialized successfully');
+        });
+
+        // Admin login functions
+        function toggleAdminLogin() {
+            console.log('toggleAdminLogin called - current admin mode:', document.body.classList.contains('admin-mode'));
+            if (document.body.classList.contains('admin-mode')) {
+                // Logout
+                console.log('Logging out admin');
+                document.body.classList.remove('admin-mode');
+                if (adminLoginBtn) {
+                    adminLoginBtn.textContent = 'Admin Login';
+                    adminLoginBtn.style.background = 'transparent';
+                    adminLoginBtn.style.color = 'black';
+                    adminLoginBtn.style.border = '1px solid #ccc';
+                }
+                updateRegisterButtonState();
+            } else {
+                // Show Login Modal
+                console.log('Opening admin login modal');
+                openAdminLoginModal();
+            }
+        }
+
+        function openAdminLoginModal() {
+            console.log('openAdminLoginModal called');
+            const modal = document.getElementById('adminLoginModal');
+            const input = document.getElementById('adminPasswordInput');
+            const error = document.getElementById('adminLoginError');
+
+            console.log('Modal element found:', modal);
+            console.log('Input element found:', input);
+            console.log('Error element found:', error);
+
+            if (modal) {
+                modal.style.display = 'flex';
+                console.log('Modal set to display: flex');
+                if (input) {
+                    input.value = '';
+                    input.focus();
+                }
+                if (error) {
+                    error.style.display = 'none';
+                }
+            } else {
+                console.error('Modal element not found');
+            }
+        }
+
+        function closeAdminLoginModal() {
+            console.log('closeAdminLoginModal called');
+            const modal = document.getElementById('adminLoginModal');
+            if (modal) {
+                modal.style.display = 'none';
+                console.log('Modal closed');
+            }
+        }
+
+        function submitAdminLogin() {
+            console.log('submitAdminLogin called');
+            const input = document.getElementById('adminPasswordInput');
+            const error = document.getElementById('adminLoginError');
+            const password = input ? input.value : '';
+            console.log('Password entered:', password ? '***' : 'empty');
+
+            if (password === 'admin123') {
+                console.log('Password correct - enabling admin mode');
+                document.body.classList.add('admin-mode');
+                updateRegisterButtonState();
+                closeAdminLoginModal();
+                alert('Admin login successful!');
+                if (adminLoginBtn) {
+                    adminLoginBtn.textContent = 'Logout Admin';
+                    adminLoginBtn.style.background = '#4CAF50';
+                    adminLoginBtn.style.color = 'white';
+                    adminLoginBtn.style.border = 'none';
+                }
+            } else {
+                console.log('Password incorrect');
+                if (error) {
+                    error.textContent = 'Incorrect password. Try admin123.';
+                    error.style.display = 'block';
+                }
+                if (input) {
+                    input.value = '';
+                    input.focus();
+                }
+            }
+        }
+
+        // Helper to update register button state
+        function updateRegisterButtonState() {
+            if (!registerBtn) return;
+            const isAdmin = document.body.classList.contains('admin-mode');
+            console.log('Updating register button state. Is admin:', isAdmin);
+
+            if (isAdmin) {
+                registerBtn.disabled = false;
+                registerBtn.classList.add('enabled');
+                console.log('Register button enabled');
+            } else {
+                registerBtn.disabled = true;
+                registerBtn.classList.remove('enabled');
+                console.log('Register button disabled');
+            }
+        }
+    </script>
+</body>
+</html>

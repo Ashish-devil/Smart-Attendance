@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Page</title>
+</head>
+<body>
+    <h1>Test Admin Login</h1>
+    <button onclick="alert('Button works!'); toggleAdminLogin()">Test Admin Login</button>
+
+    <div id="adminLoginModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; display: none; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 12px; padding: 30px; width: 90%; max-width: 400px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+            <h2>Admin Login</h2>
+            <input type="password" id="adminPasswordInput" placeholder="Enter password">
+            <br><br>
+            <button onclick="submitAdminLogin()">Login</button>
+            <button onclick="closeAdminLoginModal()">Cancel</button>
+            <p id="adminLoginError" style="color: red; display: none;"></p>
+        </div>
+    </div>
+
+    <script>
+        console.log('Test script loaded');
+
+        function toggleAdminLogin() {
+            alert('toggleAdminLogin called');
+            openAdminLoginModal();
+        }
+
+        function openAdminLoginModal() {
+            const modal = document.getElementById('adminLoginModal');
+            const input = document.getElementById('adminPasswordInput');
+            const error = document.getElementById('adminLoginError');
+
+            if (modal) {
+                modal.style.display = 'flex';
+                if (input) {
+                    input.value = '';
+                    input.focus();
+                }
+                if (error) {
+                    error.style.display = 'none';
+                }
+            }
+        }
+
+        function closeAdminLoginModal() {
+            const modal = document.getElementById('adminLoginModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function submitAdminLogin() {
+            const input = document.getElementById('adminPasswordInput');
+            const error = document.getElementById('adminLoginError');
+
+            if (!input) return;
+
+            const password = input.value;
+
+            if (password === 'admin123') {
+                alert('Login successful!');
+                closeAdminLoginModal();
+            } else {
+                if (error) {
+                    error.textContent = 'Incorrect password. Try admin123.';
+                    error.style.display = 'block';
+                }
+                if (input) {
+                    input.value = '';
+                    input.focus();
+                }
+            }
+        }
+    </script>
+</body>
+</html>

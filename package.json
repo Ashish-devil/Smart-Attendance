@@ -1,0 +1,28 @@
+{
+  "name": "smart-attendance-system",
+  "version": "1.0.0",
+  "description": "Facial Recognition Attendance System",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "author": "Ashish",
+  "license": "MIT",
+  "build": {
+    "appId": "com.attendance.desktop",
+    "productName": "Smart Attendance",
+    "win": {
+      "target": "portable",
+      "forceCodeSigning": false
+    },
+    "directories": {
+      "output": "release"
+    }
+  },
+  "devDependencies": {
+    "electron": "^25.9.8",
+    "electron-builder": "^26.8.1"
+  }
+}

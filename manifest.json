@@ -1,0 +1,17 @@
+{
+    "name": "Smart Attendance System",
+    "short_name": "Attendance",
+    "description": "Facial Recognition Tracking System",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#3b82f6",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "https://cdn-icons-png.flaticon.com/512/8188/8188383.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Attendance System</title>
+    <!-- Use a modern font -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
+    <script>
+        // Simple test to see if JavaScript is working
+        console.log('HTML script tag executed');
+        window.testFunction = function() {
+            alert('JavaScript is working!');
+        };
+    </script>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+</head>
+<body onload="console.log('HTML body loaded');">
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: flex-start; width: 100%;">
+                <div>
+                    <h1><span class="gradient-text">Smart</span> Attendance</h1>
+                    <p>Facial Recognition Tracking System</p>
+                </div>
+                <button id="loginBtn" class="secondary-btn" onclick="toggleLogin()" style="padding: 8px 16px; font-size: 0.9rem;">Login</button>
+            </div>
+            <div id="statusBadge" class="badge awaiting" style="margin-top: 15px;">Awaiting Login</div>
+        </header>
+
+        <!-- Placeholder when not logged in -->
+        <div id="loginPlaceholder" style="text-align: center; padding: 50px; background: var(--card-bg); border-radius: 20px; border: 1px solid var(--border); margin-top: 20px;">
+            <h2 style="color: var(--text-main); margin-bottom: 15px;">Welcome to Smart Attendance</h2>
+            <p style="color: var(--text-muted); font-size: 1.1rem;">Please login to continue.</p>
+        </div>
+
+        <!-- Student Dashboard Section -->
+        <div id="studentDashboard" style="display: none; padding: 30px; background: var(--card-bg); border-radius: 20px; border: 1px solid var(--border); margin-top: 20px;">
+            <h2 id="studentWelcome" style="color: var(--text-main); margin-bottom: 10px;">Welcome, Student</h2>
+            <div id="studentInfo" style="color: var(--text-muted); font-size: 1rem; margin-bottom: 30px;">
+                Course: -- | Section: -- | Specialization: --
+            </div>
+            
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div class="card" style="flex: 1; min-width: 200px; text-align: center; border-top: 4px solid #3b82f6;">
+                    <h3 style="color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase;">Total Classes Conducted</h3>
+                    <div id="studentTotalClasses" style="font-size: 3rem; font-weight: 800; color: var(--text-main); margin-top: 10px;">0</div>
+                </div>
+                <div class="card" style="flex: 1; min-width: 200px; text-align: center; border-top: 4px solid #10b981;">
+                    <h3 style="color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase;">Classes Attended</h3>
+                    <div id="studentAttendedClasses" style="font-size: 3rem; font-weight: 800; color: #10b981; margin-top: 10px;">0</div>
+                </div>
+                <div class="card" style="flex: 1; min-width: 200px; text-align: center; border-top: 4px solid #8b5cf6;">
+                    <h3 style="color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase;">Attendance Percentage</h3>
+                    <div id="studentPercentage" style="font-size: 3rem; font-weight: 800; color: #8b5cf6; margin-top: 10px;">0%</div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="main-content" style="display: none;">
+            <!-- Left Panel: Camera -->
+            <div class="camera-section">
+                <!-- Active class banner -->
+                <div id="activeClassBanner" style="display:none; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.4); border-radius: 12px; padding: 12px 16px; margin-bottom: 14px;">
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <span style="font-size:1.3rem;">📅</span>
+                        <div>
+                            <div id="activeSubjectLabel" style="font-weight:700; color:#10b981; font-size:1rem;">--</div>
+                            <div id="activeClassLabel" style="font-size:0.85rem; color:var(--text-muted);">--</div>
+                        </div>
+                        <div id="activeTimeLabel" style="margin-left:auto; font-size:0.82rem; color:var(--text-muted); white-space:nowrap;">--</div>
+                    </div>
+                </div>
+
+                <!-- No Active Class overlay (for faculty with no scheduled class) -->
+                <div id="noClassOverlay" style="display:none; text-align:center; padding:50px 20px; background:var(--card-bg); border-radius:20px; border:1px solid var(--border);">
+                    <div style="font-size:3rem; margin-bottom:16px;">⏰</div>
+                    <h3 style="color:var(--text-main); margin-bottom:10px;">No Class Scheduled Now</h3>
+                    <p id="nextClassInfo" style="color:var(--text-muted); font-size:0.95rem;">You have no class at this time. Please wait for your next scheduled class.</p>
+                </div>
+
+                <div id="cameraSection">
+                    <div class="video-container">
+                        <video id="videoElement" autoplay muted playsinline></video>
+                        <!-- Loading overlay for video -->
+                        <div id="videoLoader" class="loader-overlay">
+                            <div class="spinner"></div>
+                            <p>Initializing Camera...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Instructions for facial recognition -->
+                    <div class="card" style="margin-top: 20px; background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <h4 style="color: #10b981; margin-bottom: 10px;">📹 Facial Recognition Active</h4>
+                        <ul style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin: 0; padding-left: 20px;">
+                            <li>Green box: Recognized student (attendance marked automatically)</li>
+                            <li>Orange box: Low confidence match</li>
+                            <li>Red box: Unknown person</li>
+                            <li>System prevents duplicate attendance marks within 5 seconds</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="registration-form card admin-only">
+                    <h3>Register New Face</h3>
+                    <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 12px; margin-bottom: 15px;">
+                        <p style="font-size: 0.9rem; color: #60a5fa; margin: 0;">
+                            <strong>Registration Tip:</strong> The system will capture 3 face images for better recognition accuracy. Hold still and look directly at the camera.
+                        </p>
+                    </div>
+                    <div class="input-group" style="flex-direction: column; gap: 10px;">
+                        <input type="text" id="studentName" placeholder="Enter Full Name..." autocomplete="off" style="width: 100%;">
+                        
+                        <div style="display: flex; gap: 10px; width: 100%; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 120px;">
+                                <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 2px;">Course</label>
+                                <select id="regCourse" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-main);">
+                                    <option value="B.Tech CSE">B.Tech CSE</option>
+                                    <option value="B.Tech IT">B.Tech IT</option>
+                                    <option value="B.Tech ECE">B.Tech ECE</option>
+                                    <option value="B.Tech ME">B.Tech ME</option>
+                                    <option value="B.Tech CE">B.Tech CE</option>
+                                    <option value="MCA">MCA</option>
+                                    <option value="MBA">MBA</option>
+                                    <option value="BCA">BCA</option>
+                                    <option value="B.Sc CS">B.Sc CS</option>
+                                </select>
+                            </div>
+                            <div style="flex: 1; min-width: 80px;">
+                                <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 2px;">Section</label>
+                                <select id="regSection" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-main);">
+                                    <option value="A">Section A</option>
+                                    <option value="B">Section B</option>
+                                    <option value="C">Section C</option>
+                                    <option value="D">Section D</option>
+                                    <option value="E">Section E</option>
+                                    <option value="F">Section F</option>
+                                </select>
+                            </div>
+                            <div style="flex: 2; min-width: 150px;">
+                                <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 2px;">Specialization</label>
+                                <select id="regSpecialization" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-main);">
+                                    <option value="None">None / General</option>
+                                    <option value="Artificial Intelligence">Artificial Intelligence</option>
+                                    <option value="Data Science">Data Science</option>
+                                    <option value="Cyber Security">Cyber Security</option>
+                                    <option value="Cloud Computing">Cloud Computing</option>
+                                    <option value="Machine Learning">Machine Learning</option>
+                                    <option value="Internet of Things">Internet of Things</option>
+                                    <option value="Blockchain">Blockchain</option>
+                                    <option value="Full Stack Dev">Full Stack Dev</option>
+                                    <option value="VLSI">VLSI</option>
+                                    <option value="Embedded Systems">Embedded Systems</option>
+                                    <option value="Robotics">Robotics</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button id="registerBtn" class="primary-btn" style="width: 100%; margin-top: 5px;">Capture &amp; Register Member</button>
+                    </div>
+                    <p id="regFeedback" class="feedback"></p>
+                </div>
+            </div>
+
+            <!-- Right Panel: Logs -->
+            <div class="logs-section">
+                <div class="card logs-card">
+                    <div class="card-header" style="flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <h2 style="margin: 0 0 4px 0;">Today's Attendance</h2>
+                            <div id="currentClassLabel" style="font-size:0.82rem; color:var(--text-muted);">No active class</div>
+                        </div>
+                        <span id="presentCount" class="count-badge">0 Present</span>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table id="attendanceTable">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Course/Sec</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendanceBody">
+                                <!-- Dynamic rows -->
+                                <tr class="empty-state">
+                                    <td colspan="3">No one marked present yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                        <div style="display: flex; gap: 10px;">
+                            <button id="exportBtn" class="secondary-btn" style="flex:1;">Export Log to CSV</button>
+                            <button id="manageUsersBtn" class="secondary-btn admin-only" style="flex:1; background: #6366f1; color: white; border-color: #6366f1;" onclick="openUserManagementModal()">Manage Users</button>
+                        </div>
+                        <button id="manageTimetableBtn" class="secondary-btn admin-only" style="background: #0ea5e9; color: white; border-color: #0ea5e9;" onclick="openTimetableModal()">📅 Manage Timetable</button>
+                        <button id="resetLogBtn" class="secondary-btn admin-only" style="background: #e2e8f0; color: #1e293b; border-color: #cbd5e1;">Reset Today</button>
+                        <button id="clearDataBtn" class="secondary-btn admin-only" style="background: #fee2e2; color: #ef4444; border-color: #fca5a5;">Clear All Registered Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; display: none; align-items: center; justify-content: center;">
+        <div style="background: var(--bg-secondary); border-radius: 12px; padding: 30px; width: 90%; max-width: 400px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+            <h2 style="margin-top: 0; color: var(--text-main); text-align: center;">System Login</h2>
+            <input type="text" id="usernameInput" placeholder="Username" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-primary); color: var(--text-main); box-sizing: border-box; font-size: 1rem;">
+            <input type="password" id="passwordInput" placeholder="Password" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-primary); color: var(--text-main); box-sizing: border-box; font-size: 1rem;">
+            <div style="display: flex; gap: 10px;">
+                <button id="loginConfirmBtn" class="primary-btn" style="flex: 1;">Login</button>
+                <button id="loginCancelBtn" class="secondary-btn" style="flex: 1;">Cancel</button>
+            </div>
+            <p id="loginError" style="color: #ef4444; margin-top: 10px; margin-bottom: 0; text-align: center; display: none;"></p>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 10px; text-align: center;">Default Admin: admin / admin123<br>Students: Use Registered Name as Username & "student" as Password</p>
+        </div>
+    </div>
+
+    <!-- Load face-api.js and main script AFTER DOM is ready -->
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
+    <script src="script.js"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker registered successfully.', reg))
+                .catch(err => console.error('Service Worker registration failed:', err));
+        }
+    </script>
+</body>
+</html>
